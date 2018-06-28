@@ -1,0 +1,257 @@
+<div class="pageFive container active">
+    <h2>文化产业重新规划</h2>
+    <div class="map-container active" id="5-1">
+        <div id="viewDiv5-1"></div>
+        <a href="/arc" target="_blank">查看大图</a>
+    </div>
+    <div class="map-container active" id="5-2">
+        <div id="viewDiv5-2"></div>
+        <select id="area_select">
+            <option value="0">宝山区</option>
+            <option value="1">长宁区</option>
+            <option value="2">奉贤区</option>
+            <option value="3">虹口区</option>
+            <option value="4">黄浦区</option>
+            <option value="5">嘉定区</option>
+            <option value="6">静安区</option>
+            <option value="7">金山区</option>
+            <option value="8">闵行区</option>
+            <option value="9">浦东新区</option>
+            <option value="10">普陀区</option>
+            <option value="11">松江区</option>
+            <option value="12">徐汇区</option>
+            <option value="13">杨浦区</option>
+        </select>
+    </div>
+</div>
+<script>
+
+  require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer",
+      "esri/renderers/smartMapping/creators/size",
+      "esri/renderers/smartMapping/statistics/histogram",
+      "esri/widgets/SizeSlider",
+      "esri/widgets/Legend",
+      "esri/core/lang",
+      "dojo/on",
+      "dojo/domReady!"
+    ], function(
+      Map, MapView, FeatureLayer, sizeRendererCreator, histogram,
+      SizeSlider, Legend, lang, on
+    ) {
+
+      // Create a map and add it to a MapView
+
+      var map = new Map({
+        basemap: "gray"
+      });
+
+      var view = new MapView({
+        container: "viewDiv5-1",
+        map: map,
+        center: [121, 31],
+        zoom: 8
+      });
+
+      var map2 = new Map({
+        basemap: "gray"
+      });
+
+      var view2 = new MapView({
+        container: "viewDiv5-2",
+        map: map2,
+        center: [121, 31],
+        zoom: 8
+      });
+
+
+        map_urls = ["baoshanService", "changningService", "fengxianService", "hongkouService", "huangpuService", "jiadingService", "jinganService",
+        "jinshanService", "minghangService", "pudongService", "putuoService", "songjiangService", "xuhuiService", "yangpuService"];
+        feature_layers = [];
+        for (let i = 0, length = map_urls.length; i < length; i++) {
+            let tmpLayer = new FeatureLayer({
+                url: "https://10.60.42.201:6442/arcgis/rest/services/"+map_urls[i]+"/MapServer/0",
+                visible:false
+            });
+            feature_layers.push(tmpLayer);
+            map2.add(tmpLayer);
+
+        }
+        let last = 0;
+        feature_layers[0].visible =true;
+        $("#area_select").change(function() {
+            feature_layers[last].visible =false;
+            last = parseInt($(this).val());
+            feature_layers[last].visible =true
+        })
+
+        var povLyr = new FeatureLayer({
+            url: "https://10.60.42.201:6442/arcgis/rest/services/NeighbourService/MapServer/0",
+            outFields: ["*"],
+            popupTemplate: {
+            title: "{type}区 {name}",
+            content: "{name} 的房价为 {price}."
+        }
+    });
+
+      // configure parameters for the size renderer generator
+      // the layer must be specified along with a field name.
+      // The basemap and then determine
+      // the appropriate default size scheme.
+
+      var sizeParams = {
+        layer: povLyr,
+        basemap: map.basemap,
+        field: "price",
+        normalizationField: "avg_price",
+        legendOptions: {
+          title: "Ratio of people living in poverty"
+        },
+        minValue: 0.15
+      };
+
+      // Initialize the object containing size slider properties.
+      var sliderParams = {
+        container: "slider"
+      };
+
+      // Generate a continuous size renderer based on the
+      // statistics of the data in the provided layer
+      // and field.
+      //
+      // This resolves to an object containing several helpful
+      // properties, including size scheme, statistics,
+      // the renderer, and visual variable
+
+      sizeRendererCreator.createContinuousRenderer(sizeParams)
+        .then(function(response) {
+
+          // set generated renderer on the layer and add it to the map
+
+          povLyr.renderer = response.renderer;
+          map.add(povLyr);
+
+          // set the queried statistics and generated visual variable
+          // to the slider parameters
+
+          sliderParams.statistics = response.statistics;
+          sliderParams.visualVariable = lang.clone(response.visualVariables[
+            0]);
+
+          // Create a legend and add it to the view's UI
+
+          var legend = new Legend({
+            view: view,
+            layerInfos: [
+            {
+              layer: povLyr,
+              title: "Poverty in the southeast U.S."
+            }]
+          });
+          view.ui.add(legend, "bottom-right");
+
+          // generate a histogram for use in the slider. Input the layer
+          // and field name to generate it.
+
+          return histogram({
+            layer: povLyr,
+            field: sizeParams.field,
+            normalizationField: sizeParams.normalizationField,
+            minValue: sizeParams.minValue
+          });
+
+        })
+        .then(function(histogram) {
+
+          // when the promise resolves, set the histogram in the slider parameters
+
+          sliderParams.histogram = histogram;
+
+          // input the slider parameters in the slider's constructor
+          // and add it to the view's UI
+
+          sizeSlider = new SizeSlider(sliderParams);
+          view.ui.add("containerDiv", "bottom-left");
+
+          // when the user slides the handle(s), update the renderer
+          // with the updated color visual variable object
+          on(sizeSlider, "handle-value-change", function() {
+            var renderer = povLyr.renderer.clone();
+            renderer.visualVariables = [lang.clone(sizeSlider.visualVariable)];
+            povLyr.renderer = renderer;
+          });
+        })
+        .otherwise(function(err) {
+          console.log("there was an error: ", err);
+        });
+    });
+
+</script>
+
+
+<style>
+    .pageFive.container {
+        display: flex;
+        display: -webkit-flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .pageFive.container > div {
+        margin: 20px;
+    }
+
+    .pageFive.container > h2 {
+        align-self: flex-start;
+        color: #0088f5;
+        font-size: 1.2em;
+        margin: 40px;
+    }
+
+    .pageFive.container.active {
+        display: none;
+    }
+
+    .map-container {
+        padding: 0;
+        margin: 10px;
+        width: 100%;
+        height: 700px;
+        max-width: calc(100% - 202px);
+    }
+
+    .map-container.active {
+        display: none;
+    }
+
+    #viewDiv5-1 {
+        height: 100%;
+        width: 100%;
+    }
+
+    #viewDiv5-1.active {
+        display: none;
+    }
+
+    #viewDiv5-2 {
+        height: 100%;
+        width: 100%;
+    }
+
+    #viewDiv5-2.active {
+        display: none;
+    }
+
+    #area_select {
+        position: relative;
+        top: -90px;
+        right: -700px;
+        border-top: solid 1px rgba(50,50,50,0.25);
+        height: 35px;
+        cursor: pointer;
+    }
+</style>
