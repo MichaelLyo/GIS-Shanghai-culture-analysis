@@ -15,7 +15,7 @@
         <div class="main-container">
             <div class="sider-bar">
                 <div class="three">
-                    <img src="/images/three1.svg" alt="">
+                    <!--<img src="/images/three1.svg" alt="">-->
                 </div>
                 <div class="item" onmouseover="activeMsg(1)" onmouseout="removeActiveId()" onclick="activeSub(event)">
                     <img src="/images/more.svg" alt="" id="pic-one">
@@ -103,7 +103,7 @@
                     </div>
                 </div>
             </div>
-            <div class="sub-container">
+            <div class="sub-container" style="height:250%">
                 <!--地图-->
                 <%include pageOne.ejs%>
                 <%include pageTwo.ejs%>
@@ -125,15 +125,15 @@
 
 
 
-            $('.three').click(function () {
-              if (active === false) {
-                $('.sider-bar').addClass('active')
-                active = !active;
-              } else {
-                $('.sider-bar').removeClass('active')
-                active = !active;
-              }
-            })
+//            $('.three').click(function () {
+//              if (active === false) {
+//                $('.sider-bar').addClass('active')
+//                active = !active;
+//              } else {
+//                $('.sider-bar').removeClass('active')
+//                active = !active;
+//              }
+//            })
 
           });
 
