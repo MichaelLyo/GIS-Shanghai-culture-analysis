@@ -1,74 +1,250 @@
 <div class="pageOne container">
     <div id="viewDiv"></div>
-    <h2>文化产业在各个区的分布</h2>
-    <div id="main" style="width: 80%;height:300px;"></div>
+    <h2></h2>
+    <div id="main" style="width: 100%;height:500px;"></div>
+    <div id="second" style="width: 100%;height:500px;"></div>
+    <div id="third" style="width: 100%;height:500px;"></div>
 </div>
 <script>
+    var posList = [
+        'left', 'right', 'top', 'bottom',
+        'inside',
+        'insideTop', 'insideLeft', 'insideRight', 'insideBottom',
+        'insideTopLeft', 'insideTopRight', 'insideBottomLeft', 'insideBottomRight'
+    ];
+
+
+    var labelOption = {
+        normal: {
+            show: true,
+            fontSize: 16,
+            rich: {
+                name: {
+                    textBorderColor: '#fff'
+                }
+            }
+        }
+    };
+
   var myChart = echarts.init(document.getElementById('main'));
 
   // 指定图表的配置项和数据
   option = {
     title : {
-      text: '文化产业在各个区的分布',
+      text: '各区县文化产业数量',
       subtext: '上海市',
       x:'center'
     },
     tooltip : {
-      trigger: 'item',
-      formatter: "{a} <br/>{b} : {c} ({d}%)"
+        trigger: 'axis',
+      formatter: "{a} <br/>{b} : {c}"
     },
     legend: {
-      x : 'center',
-      y : 'bottom',
-      data:['宝山区','嘉定区','杨浦区','闸北区','虹口区','普陀区','青浦区', '闵行区', '黄浦区', '长宁区', '静安区', '卢湾区',
-        '徐汇区', '松江区', '奉贤区', '浦东新区', '金山区', '崇明县']
+      data:['宝山区','嘉定区','杨浦区','虹口区','普陀区','青浦区', '闵行区', '黄浦区', '长宁区', '静安区', '徐汇区', '松江区', '奉贤区', '浦东新区', '金山区', '崇明县']
     },
     toolbox: {
       show : true,
+        orient: 'vertical',
       feature : {
         mark : {show: true},
         dataView : {show: true, readOnly: false},
         magicType : {
           show: true,
-          type: ['pie', 'funnel']
+          type: ['line', 'bar', 'stack', 'tiled']
         },
         restore : {show: true},
         saveAsImage : {show: true}
       }
     },
     calculable : true,
+      xAxis : [
+          {
+              type : 'category',
+              data:['宝山区','嘉定区','杨浦区','虹口区','普陀区','青浦区', '闵行区', '黄浦区', '长宁区', '静安区', '徐汇区', '松江区', '奉贤区', '浦东新区', '金山区', '崇明县']
+          }
+      ],
+      yAxis : [
+          {
+              type : 'value'
+          }
+      ],
     series : [
       {
         name:'文化产业数量',
-        type:'pie',
-        radius : [30, 110],
-        roseType : 'area',
+          type:'bar',
         data:[
-          {value:1871, name:'宝山区'},
+          {value:1681, name:'宝山区'},
           {value:2280, name:'嘉定区'},
-          {value:3317, name:'杨浦区'},
-          {value:2682, name:'闸北区'},
-          {value:2249, name:'虹口区'},
-          {value:4073, name:'普陀区'},
+          {value:3216, name:'杨浦区'},
+          {value:2177, name:'虹口区'},
+          {value:4051, name:'普陀区'},
           {value:883, name:'青浦区'},
-          {value:5056, name:'闵行区'},
-          {value:2496, name:'黄浦区'},
-          {value:3860, name:'长宁区'},
-          {value:3038, name:'静安区'},
-          {value:1955, name:'卢湾区'},
-          {value:7674, name:'徐汇区'},
+          {value:4678, name:'闵行区'},
+          {value:4451, name:'黄浦区'},
+          {value:3853, name:'长宁区'},
+          {value:5720, name:'静安区'},
+          {value:7664, name:'徐汇区'},
           {value:1917, name:'松江区'},
           {value:708, name:'奉贤区'},
-          {value:8264, name:'浦东新区'},
+          {value:8120, name:'浦东新区'},
           {value:515, name:'金山区'},
-          {value:147, name:'崇明县'},
-        ]
+          {value:147, name:'崇明县'}
+        ],
+
+          itemStyle: {
+              markPoint : {
+                  data : [
+                      {type : 'max', name: '最大值'},
+                      {type : 'min', name: '最小值'}
+                  ]
+              },
+              markLine : {
+                  data : [
+                      {type : 'average', name: '平均值'}
+                  ]
+              },
+              normal: {
+                  // 随机显示
+                  //color:function(d){return "#"+Math.floor(Math.random()*(256*256*256-1)).toString(16);}
+
+                  // 定制显示（按顺序）
+                  color: function(params) {
+                      var colorList = ['#C1232B','#B5C334','#FCCE10','#E87C25','#27727B','#C33531','#EFE42A','#64BD3D','#EE9201','#29AAE3', '#B74AE5','#0AAF9F','#E89589','#16A085','#4A235A','#C39BD3 ','#F9E79F','#BA4A00','#ECF0F1','#616A6B','rgb(164,205,238)','#26C0C0','rgb(25,46,94)','rgb(195,229,235)' ];
+                      return colorList[params.dataIndex]
+                  }
+              }
+          }
       }
     ]
   };
 
   myChart.setOption(option);
 
+  var secondChart = echarts.init(document.getElementById('second'));
+  // 指定图表的配置项和数据
+  option = {
+      title : {
+          text: '各区县文化产业在上海所有企业中所占比例',
+          subtext: '上海市',
+          x:'center'
+      },
+      tooltip : {
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c}% ({d}%)"
+      },
+      legend: {
+          x : 'center',
+          y : 'bottom',
+          data:['宝山区','嘉定区','杨浦区','虹口区','普陀区','青浦区', '闵行区', '黄浦区', '长宁区', '静安区', '徐汇区', '松江区', '奉贤区', '浦东新区', '金山区', '崇明县']
+      },
+      toolbox: {
+          show : true,
+          feature : {
+              mark : {show: true},
+              dataView : {show: true, readOnly: false},
+              magicType : {
+                  show: true,
+                  type: ['pie', 'funnel']
+              },
+              restore : {show: true},
+              saveAsImage : {show: true}
+          }
+      },
+      calculable : true,
+      series : [
+          {
+              name:'文化产业占上海所有企业比例',
+              type:'pie',
+              radius : [100, 210],
+              roseType : 'area',
+              data:[
+                  {value:0.19788, name:'宝山区'},
+                  {value:0.24114, name:'嘉定区'},
+                  {value:0.35082, name:'杨浦区'},
+                  {value:0.23786, name:'虹口区'},
+                  {value:0.43078, name:'普陀区'},
+                  {value:0.09339, name:'青浦区'},
+                  {value:0.53474, name:'闵行区'},
+                  {value:0.47075, name:'黄浦区'},
+                  {value:0.40825, name:'长宁区'},
+                  {value:0.60497, name:'静安区'},
+                  {value:0.81163, name:'徐汇区'},
+                  {value:0.20275, name:'松江区'},
+                  {value:0.07488, name:'奉贤区'},
+                  {value:0.87403, name:'浦东新区'},
+                  {value:0.05447, name:'金山区'},
+                  {value:0.01554, name:'崇明县'}
+              ]
+          }
+      ]
+  };
+  secondChart.setOption(option);
+
+  var thirdChart = echarts.init(document.getElementById('third'));
+
+  // 指定图表的配置项和数据
+  option = {
+      title : {
+          text: '各区县文化产业在各区中所占比例',
+          subtext: '上海市',
+          x:'center'
+      },
+      color: ['#003366', '#006699'],
+      tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+              type: 'shadow'
+          }
+      },
+      legend: {
+          x:'center',
+          y:'bottom',
+          data: ['文化创意产业总数', '企业总数']
+      },
+      toolbox: {
+          show: true,
+          orient: 'vertical',
+          left: 'right',
+          top: 'center',
+          feature: {
+              mark: {show: true},
+              dataView: {show: true, readOnly: false},
+              magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+              restore: {show: true},
+              saveAsImage: {show: true}
+          }
+      },
+      calculable: true,
+      xAxis: [
+          {
+              type: 'category',
+              axisTick: {show: false},
+              data:['宝山区','嘉定区','杨浦区','虹口区','普陀区','青浦区', '闵行区', '黄浦区', '长宁区', '静安区', '徐汇区', '松江区', '奉贤区', '浦东新区', '金山区', '崇明县']
+          }
+      ],
+      yAxis: [
+          {
+              type: 'value'
+          }
+      ],
+      series: [
+          {
+              name: '文化创意产业总数',
+              type: 'bar',
+              barGap: 0,
+              label: labelOption,
+              data: [1681,2280,3216,2177,4051,883,4678,4451,3853,5720,7664,1917,708,8120,515,147]
+          },
+          {
+              name: '企业总数',
+              type: 'bar',
+              label: labelOption,
+              data: [56036,55297,51035,48098,54916,29150,96837,71241,56636,75791,73675,50208,26193,172579,18638,8138]
+          }
+      ]
+  };
+
+  thirdChart.setOption(option);
 
   require([
     "esri/Map",
@@ -124,7 +300,7 @@
     });
 
     var featureLayer = new FeatureLayer({
-      url: "https://10.60.42.201:6442/arcgis/rest/services/culture_poi/MapServer/0",
+      url: "https://10.60.42.201:6442/arcgis/rest/services/上海文化产业数量分布图/MapServer/0",
       outFields: ["*"],
       popupTemplate: template
     });
