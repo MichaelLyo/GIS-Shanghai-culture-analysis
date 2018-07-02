@@ -1,9 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>查询</title>
+<div class="pageSearch container active">
+    <div class="panel-side">
+        <h2>列表</h2>
+        <ul id="nyc_graphics">
+            <li>Loading&hellip;</li>
+        </ul>
+    </div>
+    <div id="sceneDiv"></div>
+</div>
 
     <link rel="stylesheet" href="https://js.arcgis.com/4.3/esri/css/main.css">
     <script src="https://js.arcgis.com/4.3/"></script>
@@ -29,7 +32,7 @@
         ) {
 
           var map = new Map({
-            basemap: "dark-gray"
+            basemap: "oceans"
           });
 
           var view = new MapView({
@@ -57,7 +60,7 @@
 
           // Create the FeatureLayer using the popupTemplate
           var featureLayer = new FeatureLayer({
-            url: "https://10.60.42.201:6442/arcgis/rest/services/ShanghaiPOI/MapServer/0",
+            url: "https://10.60.42.201:6442/arcgis/rest/services/上海POI/MapServer/0",
             outFields: ["*"],
             popupTemplate: popupTemplate
           });
@@ -128,12 +131,15 @@
             font-family: sans-serif;
         }
 
-        .panel-container {
+        .pageSearch.container {
             position: relative;
             width: 100%;
             height: 100%;
         }
 
+        .pageSearch.container.active {
+            display: none;
+        }
         .panel-side {
             padding: 2px;
             box-sizing: border-box;
@@ -177,18 +183,6 @@
         }
     </style>
 
-</head>
 
-<body>
-<div class="panel-container">
-    <div class="panel-side">
-        <h2>列表</h2>
-        <ul id="nyc_graphics">
-            <li>Loading&hellip;</li>
-        </ul>
-    </div>
-    <div id="sceneDiv"></div>
-</div>
-</body>
 
-</html>
+
