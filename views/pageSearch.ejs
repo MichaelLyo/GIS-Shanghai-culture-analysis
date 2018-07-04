@@ -225,11 +225,13 @@
             });
 
             var nameArr=[];//用于存储查询地点名称
-            var shapeArr=[];//用于存储查询shape
-            var areaArr=[];//用于存储面积
+            var points = [];
             query("#findBtn").on("click",function(){
                 var name=dom.byId("inputTxt").value;//获得输入框的值
-                //map.clear();//清空graphics
+                for(var i = 0 ;i<points.length;i++){
+                    view.graphics.remove(points[i]);
+                    //points.remove(points[i]);
+                }
                 //实例化查询参数
                 var findParams = new FindParameters();
                 findParams.returnGeometry = true;
@@ -237,36 +239,39 @@
                 findParams.searchFields = ["NAMEC"];//匹配图层中的name属性
                 findParams.searchText = name;
                 //实例化查询对象
-                var findTask = new FindTask("https://10.60.42.201:6442/arcgis/rest/services/上海POI/MapServer/0");
+                var findTask = new FindTask("https://10.60.42.201:6442/arcgis/rest/services/上海POI/MapServer");
                 //进行查询
-                findTask.execute(findParams,showFindResult)
+                findTask.execute(findParams)
+                    .then(showFindResult);
             });
             function showFindResult(queryResult) {
                 //初始化信息暂存数组
                 nameArr = [];
-                shapeArr = [];
-                areaArr = [];
+
                 if (queryResult.length === 0) {
                     alert("查询无结果");
                     return;
                 }
-                for (var i = 0; i < queryResult.length; i++) {
-                    nameArr[i] = queryResult[i].feature.attributes.NAMEC;
-                    shapeArr[i] = queryResult[i].feature.attributes.Shape;
-                    areaArr[i] = queryResult[i].feature.attributes.AREA;
-                    //定义高亮图形的符号
+                for (var i = 0; i < queryResult.results.length; i++) {
+                    nameArr[i] = queryResult.results[i].feature.attributes.NAMEC;
 
-                    var pointSymbol = new SimpleMarkerSymbol(//定义点符号
-                        SimpleMarkerSymbol.STYLE_CIRCLE, 10,
-                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-                            new Color([255, 0, 0]), 1),
-                        new Color([255, 0, 0]));
-                    var outline = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 1); //定义面的边界线符号
-                    var PolygonSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, outline, new Color([0, 255, 0, 1])); //定义面符号
+                    //定义高亮图形的符号
+                    var pointSymbol = new SimpleMarkerSymbol({
+                        style: "cross",
+                        size: 15,
+                        outline: { // autocasts as new SimpleLineSymbol()
+                            width: 4
+                        }
+                    });
+                    var outline = new SimpleLineSymbol({
+                        color: [0, 0, 255, 0.5],
+                        width: 5
+                    });
+                    //var PolygonSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, outline, new Color([0, 255, 0, 1])); //定义面符号
 
                     var graphic = {}; //创建graphic
                     var locationPoint = {};//创建定位点
-                    var geometry = queryResult[i].feature.geometry;//获得该图形的形状
+                    var geometry = queryResult.results[i].feature.geometry;//获得该图形的形状
                     if (geometry.type === "polygon") {
                         graphic = new Graphic(geometry, PolygonSymbol);
                         locationPoint = geometry.getCentroid();
@@ -276,8 +281,9 @@
                         locationPoint = geometry;
                     }
                     //将图形添加到map中
-                    map.graphics.add(graphic);
-                    map.centerAndZoom(locationPoint, 1);
+                    view.graphics.add(graphic);
+                    points.push(graphic);
+                    //map.centerAndZoom(locationPoint, 1);
                 }
             }
 
