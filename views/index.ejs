@@ -109,12 +109,22 @@
                         <span>最短路计算</span>
                     </div>
                 </div>
-                <div class="item" onmouseover="activeMsg(9)" onmouseout="removeActiveId()" onclick="changePage(9)">
+                <div class="item" onmouseover="activeMsg(9)" onmouseout="removeActiveId()" onclick="activeSub(event)">
                     <img src="/images/more.svg" alt="">
                     <p>环同济经济圈</p>
                     <div class="aside" id="msg-nine">
                         <span>环同济经济圈</span>
                     </div>
+                </div>
+                <div class="sub">
+                    <ul>
+                        <li>
+                            <a onclick="changePage(9, 1)">环同济经济圈文化产业</a>
+                        </li>
+                        <li>
+                            <a onclick="changePage(9, 2)">环同济经济圈创业园区选址</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <div class="sub-container" style="height:170rem">
@@ -129,6 +139,7 @@
                 <%include pageLoopLine.ejs%>
                 <%include ecoCircle.ejs%>
                 <%include pageSearch.ejs%>
+                <%include ecoCircleAddress.ejs%>
             </div>
         </div>
 
@@ -139,18 +150,6 @@
           var curPage = 1;
 
           $(document).ready(function(){
-
-
-
-//            $('.three').click(function () {
-//              if (active === false) {
-//                $('.sider-bar').addClass('active')
-//                active = !active;
-//              } else {
-//                $('.sider-bar').removeClass('active')
-//                active = !active;
-//              }
-//            })
 
           });
 
@@ -252,8 +251,15 @@
               clearPage();
               $('.pageEight').removeClass('active');
             }else if(curPage === 9 ){
-                clearPage();
-                $('.pageecoCircle').removeClass('active');
+                subId = arguments[1];
+                if(subId === 1) {
+                    clearPage();
+                    $('.pageecoCircle').removeClass('active');
+                }
+                else{
+                    clearPage();
+                    $('.pageecoAddress').removeClass('active');
+                }
             }
           }
 
@@ -268,6 +274,7 @@
             $('.pageLoopLine').addClass('active');
             $('.pageecoCircle').addClass('active');
             $('.pageSearch').addClass('active');
+            $('.pageecoAddress').addClass('active');
           }
 
           function clearMap() {
