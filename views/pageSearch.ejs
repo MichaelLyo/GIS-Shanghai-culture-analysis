@@ -84,7 +84,7 @@
             });
             //创建属性查询对象
             var find = new FindTask({
-                url: "https://10.60.42.201:6442/arcgis/rest/services/上海POI/MapServer"
+                url: "https://localhost:6443/arcgis/rest/services/上海POI/MapServer"
             });
             //创建属性查询参数
             var params = new FindParameters({
@@ -193,7 +193,7 @@
 
             // Create the FeatureLayer using the popupTemplate
             var featureLayer = new FeatureLayer({
-                url: "https://10.60.42.201:6442/arcgis/rest/services/上海POI/MapServer/0",
+                url: "https://localhost:6443/arcgis/rest/services/上海POI/MapServer/0",
                 outFields: ["*"],
                 popupTemplate: popupTemplate
             });
@@ -239,7 +239,7 @@
                 findParams.searchFields = ["NAMEC"];//匹配图层中的name属性
                 findParams.searchText = name;
                 //实例化查询对象
-                var findTask = new FindTask("https://10.60.42.201:6442/arcgis/rest/services/上海POI/MapServer");
+                var findTask = new FindTask("https://localhost:6443/arcgis/rest/services/上海POI/MapServer");
                 //进行查询
                 findTask.execute(findParams)
                     .then(showFindResult);
