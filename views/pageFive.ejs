@@ -290,11 +290,11 @@
         })
 
         var povLyr = new FeatureLayer({
-            url: "https://10.60.42.201:6442/arcgis/rest/services/NeighbourService/MapServer/0",
+            url: "https://10.60.42.201:6442/arcgis/rest/services/环同济经济圈寻址模型/MapServer/0",
             outFields: ["*"],
             popupTemplate: {
-            title: "{type}区 {name}",
-            content: "{name} 的房价为 {price}."
+            //title: "{type}区 {name}",
+            content: "该地区Z值为 {Z_value}."
         }
     });
 
@@ -306,8 +306,8 @@
       var sizeParams = {
         layer: povLyr,
         basemap: map.basemap,
-        field: "price",
-        normalizationField: "avg_price",
+        field: "z_value",
+        //normalizationField: "avg_price",
         legendOptions: {
           title: "Ratio of people living in poverty"
         },
