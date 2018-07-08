@@ -51,7 +51,7 @@
         ], function(Map, SceneView, FeatureLayer){
             var template = {
                 title: "寻址模型：MaxZi = Di / Pi",
-                content: "<p>{Name}</p>" + "Z值：{Join_Count}",
+                content: "Z值：{Z_value}",
                 fieldInfos: [{
                     fieldName: "MARRIED_CY",
                     format: {
@@ -153,31 +153,120 @@
             center: [121, 31]  // Sets the center point of view in lon/lat
         });
 
-        var featureLayer = new FeatureLayer({
-            url: "https://localhost:6443/arcgis/rest/services/环同济经济圈园区选址/MapServer/0",
+
+        var povLyr = new FeatureLayer({
+            url: "https://10.60.42.201:6442/arcgis/rest/services/环同济经济圈寻址模型/MapServer/0",
             outFields: ["*"],
-            popupTemplate: template
+            popupTemplate: {
+                //title: "{type}区 {name}",
+                content: "该地区Z值为 {Z_value}."
+            }
         });
 
-//        var featureLayer2 = new FeatureLayer({
-//            url: "https://localhost:6443/arcgis/rest/services/环同济经济圈/MapServer/0",
+
+        var sizeParams = {
+            layer: povLyr,
+            basemap: map.basemap,
+            field: "Z_value",
+            //normalizationField: "avg_price",
+            legendOptions: {
+                title: "Ratio of people living in poverty"
+            },
+            minValue: 0.15
+        };
+
+        // Initialize the object containing size slider properties.
+        var sliderParams = {
+            container: "slider"
+        };
+        sizeRendererCreator.createContinuousRenderer(sizeParams)
+            .then(function(response) {
+
+                // set generated renderer on the layer and add it to the map
+
+                povLyr.renderer = response.renderer;
+                map.add(povLyr);
+
+
+                // set the queried statistics and generated visual variable
+                // to the slider parameters
+
+                sliderParams.statistics = response.statistics;
+                sliderParams.visualVariable = lang.clone(response.visualVariables[
+                    0]);
+
+                // Create a legend and add it to the view's UI
+
+                var legend = new Legend({
+                    view: view,
+                    layerInfos: [
+                        {
+                            layer: povLyr,
+                            title: ""
+                        }]
+                });
+                view.ui.add(legend, "bottom-right");
+
+                // generate a histogram for use in the slider. Input the layer
+                // and field name to generate it.
+
+                return histogram({
+                    layer: povLyr,
+                    field: sizeParams.field,
+                    normalizationField: sizeParams.normalizationField,
+                    minValue: sizeParams.minValue
+                });
+
+            })
+            .then(function(histogram) {
+
+                // when the promise resolves, set the histogram in the slider parameters
+
+                sliderParams.histogram = histogram;
+
+                // input the slider parameters in the slider's constructor
+                // and add it to the view's UI
+
+                sizeSlider = new SizeSlider(sliderParams);
+                view.ui.add("containerDiv", "bottom-left");
+
+                // when the user slides the handle(s), update the renderer
+                // with the updated color visual variable object
+                on(sizeSlider, "handle-value-change", function() {
+                    var renderer = povLyr.renderer.clone();
+                    renderer.visualVariables = [lang.clone(sizeSlider.visualVariable)];
+                    povLyr.renderer = renderer;
+                });
+            })
+            .otherwise(function(err) {
+                console.log("there was an error: ", err);
+            });
+
+//        var featureLayer = new FeatureLayer({
+//            url: "https://10.60.42.201:6442/arcgis/rest/services/环同济经济圈园区选址/MapServer/0",
 //            outFields: ["*"],
 //            popupTemplate: template
 //        });
-
-
-        view.then(function() {
-            featureLayer.then(function() {
-                view.goTo(featureLayer.fullExtent);
-            });
-//            featureLayer2.then(function() {
+//
+////        var featureLayer2 = new FeatureLayer({
+////            url: "https://10.60.42.201:6442/arcgis/rest/services/环同济经济圈/MapServer/0",
+////            outFields: ["*"],
+////            popupTemplate: template
+////        });
+//
+//
+//        view.then(function() {
+//            featureLayer.then(function() {
 //                view.goTo(featureLayer.fullExtent);
 //            });
-        });
-
-
-        map.add(featureLayer)
-//        map.add(featureLayer2)
+////            featureLayer2.then(function() {
+////                view.goTo(featureLayer.fullExtent);
+////            });
+//        });
+//
+//
+//        map.add(featureLayer)
+////        map.add(featureLayer2)
 
     });
 
