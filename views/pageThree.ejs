@@ -1,5 +1,7 @@
 <div class="pageThree container active">
-    <div class="selectThree" style=";margin:0">
+
+    <div class="selectThree" style="margin:0">
+
         <span class="placeholder">底图选择</span>
         <ul>
             <li value="oceans">oceans</li>
@@ -401,7 +403,7 @@
           });
 
           var featureLayer = new FeatureLayer({
-              // url: "https://10.60.42.201:6442/arcgis/rest/services/culture_poi/MapServer/1",
+
               url:"https://10.60.42.201:6442/arcgis/rest/services/%E4%BA%BA%E6%B0%91%E5%B9%BF%E5%9C%BA/MapServer/0",
               outFields: ["*"],
               popupTemplate: template
@@ -475,11 +477,13 @@
         center: [121, 31]  // Sets the center point of view in lon/lat
     });
 
+
       var featureLayer = new FeatureLayer({
           // url: "https://10.60.42.201:6442/arcgis/rest/services/culture_poi/MapServer/1",
           url:"https://10.60.42.201:6442/arcgis/rest/services/%E4%BA%BA%E6%B0%91%E5%B9%BF%E5%9C%BA/MapServer/0",
           outFields: ["*"],
           popupTemplate: template
+
       });
       var featureLayer1 = new FeatureLayer({
           // url: "https://10.60.42.201:6442/arcgis/rest/services/culture_poi/MapServer/1",

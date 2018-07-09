@@ -1,5 +1,7 @@
 <div class="pageTwo container active">
-    <div class="selectTwo" style=";margin:0">
+
+    <div class="selectTwo" style="margin:0">
+
         <span class="placeholder">底图选择</span>
         <ul>
             <li value="oceans">oceans</li>
@@ -26,422 +28,504 @@
 </div>
 
 <script>
-  var myChart1 = echarts.init(document.getElementById('main1'));
+    var myChart = echarts.init(document.getElementById('main1'));
 
-  option1 = {
-    title: {
-      text: '历史文化因素',
-      subtext: '计算结果'
-    },
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
-      }
-    },
-    legend: {
-      data: ['有形', '无形', '产业']
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
-    },
-    xAxis: {
-      type: 'value',
-      boundaryGap: [0, 0.01]
-    },
-    yAxis: {
-      type: 'category',
-      data: ['宝山区','嘉定区','杨浦区','闸北区','虹口区','普陀区','青浦区', '闵行区', '黄浦区', '长宁区', '静安区', '卢湾区',
-        '徐汇区', '松江区', '奉贤区', '浦东新区', '金山区', '崇明县']
-    },
+    option = {
+        title: {
+            text: '使用层次分析法得到两个区的四个指标',
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data:['杨浦区','黄浦区']
+        },
+        toolbox: {
+            show: true,
+            feature: {
+                dataZoom: {
+                    yAxisIndex: 'none'
+                },
+                dataView: {readOnly: false},
+                magicType: {type: ['line', 'bar']},
+                restore: {},
+                saveAsImage: {}
+            }
+        },
+        xAxis:  {
+            type: 'category',
+            boundaryGap: false,
+            data: ['政治文化','海派文化','民族工业','大学文化']
+        },
+        yAxis: {
+            type: 'value',
+            axisLabel: {
+                formatter: '{value}'
+            }
+        },
+        series: [
+            {
+                name:'杨浦区',
+                type:'line',
+                data:[5, 4, 12, 13],
+                markPoint: {
+                    data: [
+                        {type: 'max', name: '最大值'},
+                        {type: 'min', name: '最小值'}
+                    ]
+                },
+                markLine: {
+                    data: [
+                        {type: 'average', name: '平均值'}
+                    ]
+                }
+            },
+            {
+                name:'黄浦区',
+                type:'line',
+                data:[5, 8, 4,6],
+                markPoint: {
+                    data: [
+                        {name: '周最低', value: -2, xAxis: 1, yAxis: -1.5}
+                    ]
+                },
+                markLine: {
+                    data: [
+                        {type: 'average', name: '平均值'},
+                        [{
+                            symbol: 'none',
+                            x: '90%',
+                            yAxis: 'max'
+                        }, {
+                            symbol: 'circle',
+                            label: {
+                                normal: {
+                                    position: 'start',
+                                    formatter: '最大值'
+                                }
+                            },
+                            type: 'max',
+                            name: '最高点'
+                        }]
+                    ]
+                }
+            }
+        ]
+    };
+
     series: [
-      {
-        name: '有形',
-        type: 'bar',
-        data: [3.186, 2.814, 4.1349, 3.3071, 4, 4.3071, 3.0649, 3.3071, 4.628, 3.628, 4.628, 4.5069, 4.4931, 3.3071, 3.186,
-          4.6929, 2.372, 2.558]
-      },
-      {
-        name: '无形',
-        type: 'bar',
-        data: [3.3124, 3.0579, 4.1684, 2.7966, 4, 3.2579, 3.8316, 3.4263, 4.4842, 3.5192, 4, 3.5387, 3.9455, 3.2034, 3.2, 3.5158,
-          2.5158, 2.5703]
-      },
-      {
-        name: '产业',
-        type: 'bar',
-        data: [2.2393, 3.7601, 4.9995, 3.2392, 3.7018, 2.9997, 2.2393, 4.0579, 4.7017, 3.7018, 3.9413, 3.2392, 4.76, 3.7601, 2.8349, 4.4039,
-          1.9998, 1.4789]
-      }
-    ]
-  };
-  myChart1.setOption(option1);
-
-  var basemap = "";
-  $('.selectTwo').on('click', '.placeholder', function(e) {
-      var parent = $(this).closest('.selectTwo');
-      if (!parent.hasClass('is-open')) {
-          parent.addClass('is-open');
-          $('.selectTwo.is-open').not(parent).removeClass('is-open');
-      } else {
-          parent.removeClass('is-open');
-      }
-      e.stopPropagation();
-  }).on('click', 'ul>li', function() {
-      var parent = $(this).closest('.selectTwo');
-      parent.removeClass('is-open').find('.placeholder').text($(this).text());
-      basemap = this.attributes[0].value;
-      require([
-          "esri/Map",
-          "esri/views/SceneView",
-          "esri/layers/FeatureLayer",
-          "dojo/domReady!"
-      ], function(Map, SceneView, FeatureLayer){
-          var template = {
-              title: "文化历史区域信息：",
-              content: "<p>{区县级行政区划.Name} 有形</p>" + "{history.csv.有形}",
-              fieldInfos: [{
-                  fieldName: "MARRIED_CY",
-                  format: {
-                      digitSeparator: true, // Use a comma separator for large numbers
-                      places: 0 // Sets the number of decimal places to 0 and rounds up
-                  }
-              }, {
-                  fieldName: "NEVMARR_CY",
-                  format: {
-                      digitSeparator: true,
-                      places: 0
-                  }
-              }, {
-                  fieldName: "DIVORCD_CY",
-                  format: {
-                      digitSeparator: true,
-                      places: 0
-                  }
-              }]
-          };
-
-          // Create the Map
-          var map = new Map({
-              basemap: basemap,
-              ground: "world-elevation"
-          });
-
-          // Create the MapView
-          var view = new SceneView({
-              container: "viewDiv2-1",
-              map: map,
-              zoom: 12,  // Sets the zoom level based on level of detail (LOD)
-              center: [121, 31]  // Sets the center point of view in lon/lat
-          });
-
-          var featureLayer = new FeatureLayer({
-              url: "https://10.60.42.201:6442/arcgis/rest/services/History/MapServer/0",
-              outFields: ["*"],
-              popupTemplate: template
-          });
-
-          view.then(function() {
-              featureLayer.then(function() {
-                  view.goTo(featureLayer.fullExtent);
-              });
-          });
-          map.add(featureLayer)
-      });
-
-      require([
-          "esri/Map",
-          "esri/views/SceneView",
-          "esri/layers/FeatureLayer",
-          "dojo/domReady!"
-      ], function(Map, SceneView, FeatureLayer){
-          var template = {
-              title: "文化历史区域信息：",
-              content: "<p>{区县级行政区划.Name} 无形</p>" + "{history.csv.无形}",
-              fieldInfos: [{
-                  fieldName: "MARRIED_CY",
-                  format: {
-                      digitSeparator: true, // Use a comma separator for large numbers
-                      places: 0 // Sets the number of decimal places to 0 and rounds up
-                  }
-              }, {
-                  fieldName: "NEVMARR_CY",
-                  format: {
-                      digitSeparator: true,
-                      places: 0
-                  }
-              }, {
-                  fieldName: "DIVORCD_CY",
-                  format: {
-                      digitSeparator: true,
-                      places: 0
-                  }
-              }]
-          };
-
-          // Create the Map
-          var map = new Map({
-              basemap: basemap,
-              ground: "world-elevation"
-          });
-
-          // Create the MapView
-          var view = new SceneView({
-              container: "viewDiv2-2",
-              map: map,
-              zoom: 12,  // Sets the zoom level based on level of detail (LOD)
-              center: [121, 31]  // Sets the center point of view in lon/lat
-          });
-
-          var featureLayer = new FeatureLayer({
-              url: "https://192.168.1.50:6442/arcgis/rest/services/History/MapServer/1",
-              outFields: ["*"],
-              popupTemplate: template
-          });
-
-          view.then(function() {
-              featureLayer.then(function() {
-                  view.goTo(featureLayer.fullExtent);
-              });
-          });
-          map.add(featureLayer)
-      });
-
-      require([
-          "esri/Map",
-          "esri/views/SceneView",
-          "esri/layers/FeatureLayer",
-          "dojo/domReady!"
-      ], function(Map, SceneView, FeatureLayer){
-          var template = {
-              title: "文化历史区域信息：",
-              content: "<p>{区县级行政区划.Name} 产业</p>" + "{history.csv.产业}",
-              fieldInfos: [{
-                  fieldName: "MARRIED_CY",
-                  format: {
-                      digitSeparator: true, // Use a comma separator for large numbers
-                      places: 0 // Sets the number of decimal places to 0 and rounds up
-                  }
-              }, {
-                  fieldName: "NEVMARR_CY",
-                  format: {
-                      digitSeparator: true,
-                      places: 0
-                  }
-              }, {
-                  fieldName: "DIVORCD_CY",
-                  format: {
-                      digitSeparator: true,
-                      places: 0
-                  }
-              }]
-          };
-
-          // Create the Map
-          var map = new Map({
-              basemap: basemap,
-              ground: "world-elevation"
-          });
-
-          // Create the MapView
-          var view = new SceneView({
-              container: "viewDiv2-3",
-              map: map,
-              zoom: 12,  // Sets the zoom level based on level of detail (LOD)
-              center: [121, 31]  // Sets the center point of view in lon/lat
-          });
-
-          var featureLayer = new FeatureLayer({
-              url: "https://192.168.1.50:6442/arcgis/rest/services/History/MapServer/2",
-              outFields: ["*"],
-              popupTemplate: template
-          });
-
-          view.then(function() {
-              featureLayer.then(function() {
-                  view.goTo(featureLayer.fullExtent);
-              });
-          });
-          map.add(featureLayer)
-      });
-
-  })
-  require([
-    "esri/Map",
-    "esri/views/SceneView",
-    "esri/layers/FeatureLayer",
-    "dojo/domReady!"
-  ], function(Map, SceneView, FeatureLayer){
-    var template = {
-      title: "文化历史区域信息：",
-      content: "<p>{区县级行政区划.Name} 有形</p>" + "{history.csv.有形}",
-      fieldInfos: [{
-        fieldName: "MARRIED_CY",
-        format: {
-          digitSeparator: true, // Use a comma separator for large numbers
-          places: 0 // Sets the number of decimal places to 0 and rounds up
+        {
+            name:'最高气温',
+            type:'line',
+            data:[11, 11, 15, 13, 12, 13, 10],
+            markPoint: {
+                data: [
+                    {type: 'max', name: '最大值'},
+                    {type: 'min', name: '最小值'}
+                ]
+            },
+            markLine: {
+                data: [
+                    {type: 'average', name: '平均值'}
+                ]
+            }
+        },
+        {
+            name:'最低气温',
+            type:'line',
+            data:[1, -2, 2, 5, 3, 2, 0],
+            markPoint: {
+                data: [
+                    {name: '周最低', value: -2, xAxis: 1, yAxis: -1.5}
+                ]
+            },
+            markLine: {
+                data: [
+                    {type: 'average', name: '平均值'},
+                    [{
+                        symbol: 'none',
+                        x: '90%',
+                        yAxis: 'max'
+                    }, {
+                        symbol: 'circle',
+                        label: {
+                            normal: {
+                                position: 'start',
+                                formatter: '最大值'
+                            }
+                        },
+                        type: 'max',
+                        name: '最高点'
+                    }]
+                ]
+            }
         }
-      }, {
-        fieldName: "NEVMARR_CY",
-        format: {
-          digitSeparator: true,
-          places: 0
+    ];
+
+    myChart.setOption(option);
+
+    var basemap = "";
+    $('.selectTwo').on('click', '.placeholder', function(e) {
+        var parent = $(this).closest('.selectTwo');
+        if (!parent.hasClass('is-open')) {
+            parent.addClass('is-open');
+            $('.selectTwo.is-open').not(parent).removeClass('is-open');
+        } else {
+            parent.removeClass('is-open');
         }
-      }, {
-        fieldName: "DIVORCD_CY",
-        format: {
-          digitSeparator: true,
-          places: 0
-        }
-      }]
-    };
+        e.stopPropagation();
+    }).on('click', 'ul>li', function() {
+        var parent = $(this).closest('.selectTwo');
+        parent.removeClass('is-open').find('.placeholder').text($(this).text());
+        basemap = this.attributes[0].value;
+        require([
+            "esri/Map",
+            "esri/views/SceneView",
+            "esri/layers/FeatureLayer",
+            "dojo/domReady!"
+        ], function(Map, SceneView, FeatureLayer){
+            var template = {
+                title: "文化历史区域信息：",
+                content: "<p>{区县级行政区划.Name} 有形</p>" + "{history.csv.有形}",
+                fieldInfos: [{
+                    fieldName: "MARRIED_CY",
+                    format: {
+                        digitSeparator: true, // Use a comma separator for large numbers
+                        places: 0 // Sets the number of decimal places to 0 and rounds up
+                    }
+                }, {
+                    fieldName: "NEVMARR_CY",
+                    format: {
+                        digitSeparator: true,
+                        places: 0
+                    }
+                }, {
+                    fieldName: "DIVORCD_CY",
+                    format: {
+                        digitSeparator: true,
+                        places: 0
+                    }
+                }]
+            };
 
-    // Create the Map
-    var map = new Map({
-      basemap: "oceans",
-      ground: "world-elevation"
+            // Create the Map
+            var map = new Map({
+                basemap: basemap,
+                ground: "world-elevation"
+            });
+
+            // Create the MapView
+            var view = new SceneView({
+                container: "viewDiv2-1",
+                map: map,
+                zoom: 12,  // Sets the zoom level based on level of detail (LOD)
+                center: [121, 31]  // Sets the center point of view in lon/lat
+            });
+
+            var featureLayer = new FeatureLayer({
+                url: "https://10.60.42.201:6442/arcgis/rest/services/History/MapServer/0",
+                outFields: ["*"],
+                popupTemplate: template
+            });
+
+            view.then(function() {
+                featureLayer.then(function() {
+                    view.goTo(featureLayer.fullExtent);
+                });
+            });
+            map.add(featureLayer)
+        });
+
+        require([
+            "esri/Map",
+            "esri/views/SceneView",
+            "esri/layers/FeatureLayer",
+            "dojo/domReady!"
+        ], function(Map, SceneView, FeatureLayer){
+            var template = {
+                title: "文化历史区域信息：",
+                content: "<p>{区县级行政区划.Name} 无形</p>" + "{history.csv.无形}",
+                fieldInfos: [{
+                    fieldName: "MARRIED_CY",
+                    format: {
+                        digitSeparator: true, // Use a comma separator for large numbers
+                        places: 0 // Sets the number of decimal places to 0 and rounds up
+                    }
+                }, {
+                    fieldName: "NEVMARR_CY",
+                    format: {
+                        digitSeparator: true,
+                        places: 0
+                    }
+                }, {
+                    fieldName: "DIVORCD_CY",
+                    format: {
+                        digitSeparator: true,
+                        places: 0
+                    }
+                }]
+            };
+
+            // Create the Map
+            var map = new Map({
+                basemap: basemap,
+                ground: "world-elevation"
+            });
+
+            // Create the MapView
+            var view = new SceneView({
+                container: "viewDiv2-2",
+                map: map,
+                zoom: 12,  // Sets the zoom level based on level of detail (LOD)
+                center: [121, 31]  // Sets the center point of view in lon/lat
+            });
+
+            var featureLayer = new FeatureLayer({
+                url: "https://192.168.1.50:6442/arcgis/rest/services/History/MapServer/1",
+                outFields: ["*"],
+                popupTemplate: template
+            });
+
+            view.then(function() {
+                featureLayer.then(function() {
+                    view.goTo(featureLayer.fullExtent);
+                });
+            });
+            map.add(featureLayer)
+        });
+
+        require([
+            "esri/Map",
+            "esri/views/SceneView",
+            "esri/layers/FeatureLayer",
+            "dojo/domReady!"
+        ], function(Map, SceneView, FeatureLayer){
+            var template = {
+                title: "文化历史区域信息：",
+                content: "<p>{区县级行政区划.Name} 产业</p>" + "{history.csv.产业}",
+                fieldInfos: [{
+                    fieldName: "MARRIED_CY",
+                    format: {
+                        digitSeparator: true, // Use a comma separator for large numbers
+                        places: 0 // Sets the number of decimal places to 0 and rounds up
+                    }
+                }, {
+                    fieldName: "NEVMARR_CY",
+                    format: {
+                        digitSeparator: true,
+                        places: 0
+                    }
+                }, {
+                    fieldName: "DIVORCD_CY",
+                    format: {
+                        digitSeparator: true,
+                        places: 0
+                    }
+                }]
+            };
+
+            // Create the Map
+            var map = new Map({
+                basemap: basemap,
+                ground: "world-elevation"
+            });
+
+            // Create the MapView
+            var view = new SceneView({
+                container: "viewDiv2-3",
+                map: map,
+                zoom: 12,  // Sets the zoom level based on level of detail (LOD)
+                center: [121, 31]  // Sets the center point of view in lon/lat
+            });
+
+            var featureLayer = new FeatureLayer({
+                url: "https://192.168.1.50:6442/arcgis/rest/services/History/MapServer/2",
+                outFields: ["*"],
+                popupTemplate: template
+            });
+
+            view.then(function() {
+                featureLayer.then(function() {
+                    view.goTo(featureLayer.fullExtent);
+                });
+            });
+            map.add(featureLayer)
+        });
+
+    })
+    require([
+        "esri/Map",
+        "esri/views/SceneView",
+        "esri/layers/FeatureLayer",
+        "dojo/domReady!"
+    ], function(Map, SceneView, FeatureLayer){
+        var template = {
+            title: "文化历史区域信息：",
+            content: "<p>{区县级行政区划.Name} 有形</p>" + "{history.csv.有形}",
+            fieldInfos: [{
+                fieldName: "MARRIED_CY",
+                format: {
+                    digitSeparator: true, // Use a comma separator for large numbers
+                    places: 0 // Sets the number of decimal places to 0 and rounds up
+                }
+            }, {
+                fieldName: "NEVMARR_CY",
+                format: {
+                    digitSeparator: true,
+                    places: 0
+                }
+            }, {
+                fieldName: "DIVORCD_CY",
+                format: {
+                    digitSeparator: true,
+                    places: 0
+                }
+            }]
+        };
+
+        // Create the Map
+        var map = new Map({
+            basemap: "oceans",
+            ground: "world-elevation"
+        });
+
+        // Create the MapView
+        var view = new SceneView({
+            container: "viewDiv2-1",
+            map: map,
+            zoom: 12,  // Sets the zoom level based on level of detail (LOD)
+            center: [121, 31]  // Sets the center point of view in lon/lat
+        });
+
+        var featureLayer = new FeatureLayer({
+            url: "https://10.60.42.201:6442/arcgis/rest/services/History/MapServer/0",
+            outFields: ["*"],
+            popupTemplate: template
+        });
+
+        view.then(function() {
+            featureLayer.then(function() {
+                view.goTo(featureLayer.fullExtent);
+            });
+        });
+        map.add(featureLayer)
     });
 
-    // Create the MapView
-    var view = new SceneView({
-      container: "viewDiv2-1",
-      map: map,
-        zoom: 12,  // Sets the zoom level based on level of detail (LOD)
-        center: [121, 31]  // Sets the center point of view in lon/lat
+    require([
+        "esri/Map",
+        "esri/views/SceneView",
+        "esri/layers/FeatureLayer",
+        "dojo/domReady!"
+    ], function(Map, SceneView, FeatureLayer){
+        var template = {
+            title: "文化历史区域信息：",
+            content: "<p>{区县级行政区划.Name} 无形</p>" + "{history.csv.无形}",
+            fieldInfos: [{
+                fieldName: "MARRIED_CY",
+                format: {
+                    digitSeparator: true, // Use a comma separator for large numbers
+                    places: 0 // Sets the number of decimal places to 0 and rounds up
+                }
+            }, {
+                fieldName: "NEVMARR_CY",
+                format: {
+                    digitSeparator: true,
+                    places: 0
+                }
+            }, {
+                fieldName: "DIVORCD_CY",
+                format: {
+                    digitSeparator: true,
+                    places: 0
+                }
+            }]
+        };
+
+        // Create the Map
+        var map = new Map({
+            basemap: "oceans",
+            ground: "world-elevation"
+        });
+
+        // Create the MapView
+        var view = new SceneView({
+            container: "viewDiv2-2",
+            map: map,
+            zoom: 12,  // Sets the zoom level based on level of detail (LOD)
+            center: [121, 31]  // Sets the center point of view in lon/lat
+        });
+
+        var featureLayer = new FeatureLayer({
+            url: "https://192.168.1.50:6442/arcgis/rest/services/History/MapServer/1",
+            outFields: ["*"],
+            popupTemplate: template
+        });
+
+        view.then(function() {
+            featureLayer.then(function() {
+                view.goTo(featureLayer.fullExtent);
+            });
+        });
+        map.add(featureLayer)
     });
 
-    var featureLayer = new FeatureLayer({
-      url: "https://10.60.42.201:6442/arcgis/rest/services/History/MapServer/0",
-      outFields: ["*"],
-      popupTemplate: template
+    require([
+        "esri/Map",
+        "esri/views/SceneView",
+        "esri/layers/FeatureLayer",
+        "dojo/domReady!"
+    ], function(Map, SceneView, FeatureLayer){
+        var template = {
+            title: "文化历史区域信息：",
+            content: "<p>{区县级行政区划.Name} 产业</p>" + "{history.csv.产业}",
+            fieldInfos: [{
+                fieldName: "MARRIED_CY",
+                format: {
+                    digitSeparator: true, // Use a comma separator for large numbers
+                    places: 0 // Sets the number of decimal places to 0 and rounds up
+                }
+            }, {
+                fieldName: "NEVMARR_CY",
+                format: {
+                    digitSeparator: true,
+                    places: 0
+                }
+            }, {
+                fieldName: "DIVORCD_CY",
+                format: {
+                    digitSeparator: true,
+                    places: 0
+                }
+            }]
+        };
+
+        // Create the Map
+        var map = new Map({
+            basemap: "oceans",
+            ground: "world-elevation"
+        });
+
+        // Create the MapView
+        var view = new SceneView({
+            container: "viewDiv2-3",
+            map: map,
+            zoom: 12,  // Sets the zoom level based on level of detail (LOD)
+            center: [121, 31]  // Sets the center point of view in lon/lat
+        });
+
+        var featureLayer = new FeatureLayer({
+            url: "https://localhost:6443/arcgis/rest/services/History/MapServer/2",
+            outFields: ["*"],
+            popupTemplate: template
+        });
+
+        view.then(function() {
+            featureLayer.then(function() {
+                view.goTo(featureLayer.fullExtent);
+            });
+        });
+        map.add(featureLayer)
     });
-
-    view.then(function() {
-      featureLayer.then(function() {
-        view.goTo(featureLayer.fullExtent);
-      });
-    });
-    map.add(featureLayer)
-  });
-
-  require([
-    "esri/Map",
-    "esri/views/SceneView",
-    "esri/layers/FeatureLayer",
-    "dojo/domReady!"
-  ], function(Map, SceneView, FeatureLayer){
-    var template = {
-      title: "文化历史区域信息：",
-      content: "<p>{区县级行政区划.Name} 无形</p>" + "{history.csv.无形}",
-      fieldInfos: [{
-        fieldName: "MARRIED_CY",
-        format: {
-          digitSeparator: true, // Use a comma separator for large numbers
-          places: 0 // Sets the number of decimal places to 0 and rounds up
-        }
-      }, {
-        fieldName: "NEVMARR_CY",
-        format: {
-          digitSeparator: true,
-          places: 0
-        }
-      }, {
-        fieldName: "DIVORCD_CY",
-        format: {
-          digitSeparator: true,
-          places: 0
-        }
-      }]
-    };
-
-    // Create the Map
-    var map = new Map({
-      basemap: "oceans",
-      ground: "world-elevation"
-    });
-
-    // Create the MapView
-    var view = new SceneView({
-      container: "viewDiv2-2",
-      map: map,
-        zoom: 12,  // Sets the zoom level based on level of detail (LOD)
-        center: [121, 31]  // Sets the center point of view in lon/lat
-    });
-
-    var featureLayer = new FeatureLayer({
-      url: "https://192.168.1.50:6442/arcgis/rest/services/History/MapServer/1",
-      outFields: ["*"],
-      popupTemplate: template
-    });
-
-    view.then(function() {
-      featureLayer.then(function() {
-        view.goTo(featureLayer.fullExtent);
-      });
-    });
-    map.add(featureLayer)
-  });
-
-  require([
-    "esri/Map",
-    "esri/views/SceneView",
-    "esri/layers/FeatureLayer",
-    "dojo/domReady!"
-  ], function(Map, SceneView, FeatureLayer){
-    var template = {
-      title: "文化历史区域信息：",
-      content: "<p>{区县级行政区划.Name} 产业</p>" + "{history.csv.产业}",
-      fieldInfos: [{
-        fieldName: "MARRIED_CY",
-        format: {
-          digitSeparator: true, // Use a comma separator for large numbers
-          places: 0 // Sets the number of decimal places to 0 and rounds up
-        }
-      }, {
-        fieldName: "NEVMARR_CY",
-        format: {
-          digitSeparator: true,
-          places: 0
-        }
-      }, {
-        fieldName: "DIVORCD_CY",
-        format: {
-          digitSeparator: true,
-          places: 0
-        }
-      }]
-    };
-
-    // Create the Map
-    var map = new Map({
-      basemap: "oceans",
-      ground: "world-elevation"
-    });
-
-    // Create the MapView
-    var view = new SceneView({
-      container: "viewDiv2-3",
-      map: map,
-        zoom: 12,  // Sets the zoom level based on level of detail (LOD)
-        center: [121, 31]  // Sets the center point of view in lon/lat
-    });
-
-    var featureLayer = new FeatureLayer({
-      url: "https://192.168.1.50:6442/arcgis/rest/services/History/MapServer/2",
-      outFields: ["*"],
-      popupTemplate: template
-    });
-
-    view.then(function() {
-      featureLayer.then(function() {
-        view.goTo(featureLayer.fullExtent);
-      });
-    });
-    map.add(featureLayer)
-  });
 
 </script>
 

@@ -50,7 +50,9 @@
 </head>
 
 <body class="claro">
-<div class="selecttest" style=";margin:0">
+
+<div class="selecttest" style="margin:0">
+
     <span class="placeholder">底图选择</span>
     <ul>
         <li value="oceans">oceans</li>
@@ -125,7 +127,7 @@
             // Create FeatureLayer instance with popupTemplate
 
             var povLyr = new FeatureLayer({
-                url: "https://10.60.42.201:6442/arcgis/rest/services/NeighbourService/MapServer",
+                url: "https://localhost:6443/arcgis/rest/services/NeighbourService/MapServer",
                 outFields: ["*"],
                 popupTemplate: {
                     title: "{name}",
@@ -276,7 +278,7 @@
     // Create FeatureLayer instance with popupTemplate
 
     var povLyr = new FeatureLayer({
-      url: "https://10.60.42.201:6442/arcgis/rest/services/NeighbourService/MapServer",
+      url: "https://localhost:6443/arcgis/rest/services/NeighbourService/MapServer",
       outFields: ["*"],
       popupTemplate: {
         title: "{name}",
