@@ -11,7 +11,7 @@
     <span>寻址模型：</span>
     <span>MaxZi = Di / Pi</span>
     <span>Di 越大意味着该区域的交通情况越良好，越小意为着该地区的房价越低，越适合作为创业园区,因此求解模型即是求最小的Z值。</span>
-    <div class="selectAddress" style="right:720px;margin:0">
+    <div class="selectAddress" style=";margin:0">
         <span class="placeholder">底图选择</span>
         <ul>
             <li value="oceans">oceans</li>
@@ -47,11 +47,18 @@
             "esri/Map",
             "esri/views/SceneView",
             "esri/layers/FeatureLayer",
+            "esri/renderers/smartMapping/creators/size",
+            "esri/renderers/smartMapping/statistics/histogram",
+            "esri/widgets/SizeSlider",
+            "esri/widgets/Legend",
+            "esri/core/lang",
+            "dojo/on",
             "dojo/domReady!"
-        ], function(Map, SceneView, FeatureLayer){
+        ], function(Map, SceneView, FeatureLayer,sizeRendererCreator, histogram,
+                    SizeSlider, Legend, lang, on) {
             var template = {
                 title: "寻址模型：MaxZi = Di / Pi",
-                content: "Z值：{Z_value}",
+                content: "Z值：{Join_Count}",
                 fieldInfos: [{
                     fieldName: "MARRIED_CY",
                     format: {
@@ -77,7 +84,7 @@
             var map = new Map({
                 basemap: basemap,
                 ground: "world-elevation",
-                logo:false
+                logo: false
             });
 
             // Create the MapView
@@ -88,21 +95,92 @@
                 center: [121, 31]  // Sets the center point of view in lon/lat
             });
 
-            var featureLayer = new FeatureLayer({
-                url: "https://10.60.42.201:6442/arcgis/rest/services/环同济经济圈园区选址/MapServer/0",
+            var povLyr = new FeatureLayer({
+                url: "https://10.60.42.201:6442/arcgis/rest/services/环同济经济圈寻址模型/MapServer/0",
                 outFields: ["*"],
-                popupTemplate: template
+                popupTemplate: {
+                    title: "寻址模型：MaxZi = Di / Pi",
+                    content: "该地区Z值为 {Z_value}."
+                }
             });
-            view.then(function() {
-                featureLayer.then(function() {
-                    view.goTo(featureLayer.fullExtent);
+
+            var sizeParams = {
+                layer: povLyr,
+                basemap: map.basemap,
+                field: "Z_value",
+                //normalizationField: "avg_price",
+                legendOptions: {
+                    title: "Ratio of people living in poverty"
+                },
+                minValue: 0.15
+            };
+
+            // Initialize the object containing size slider properties.
+            var sliderParams = {
+                container: "slider"
+            };
+            sizeRendererCreator.createContinuousRenderer(sizeParams)
+                .then(function (response) {
+
+                    // set generated renderer on the layer and add it to the map
+
+                    povLyr.renderer = response.renderer;
+                    map.add(povLyr);
+
+                    // set the queried statistics and generated visual variable
+                    // to the slider parameters
+
+                    sliderParams.statistics = response.statistics;
+                    sliderParams.visualVariable = lang.clone(response.visualVariables[
+                        0]);
+
+                    // Create a legend and add it to the view's UI
+
+                    var legend = new Legend({
+                        view: view,
+                        layerInfos: [
+                            {
+                                layer: povLyr,
+                                title: ""
+                            }]
+                    });
+                    view.ui.add(legend, "bottom-right");
+
+                    // generate a histogram for use in the slider. Input the layer
+                    // and field name to generate it.
+
+                    return histogram({
+                        layer: povLyr,
+                        field: sizeParams.field,
+                        normalizationField: sizeParams.normalizationField,
+                        minValue: sizeParams.minValue
+                    });
+
+                })
+                .then(function (histogram) {
+
+                    // when the promise resolves, set the histogram in the slider parameters
+
+                    sliderParams.histogram = histogram;
+
+                    // input the slider parameters in the slider's constructor
+                    // and add it to the view's UI
+
+                    sizeSlider = new SizeSlider(sliderParams);
+                    view.ui.add("containerDiv", "bottom-left");
+
+                    // when the user slides the handle(s), update the renderer
+                    // with the updated color visual variable object
+                    on(sizeSlider, "handle-value-change", function () {
+                        var renderer = povLyr.renderer.clone();
+                        renderer.visualVariables = [lang.clone(sizeSlider.visualVariable)];
+                        povLyr.renderer = renderer;
+                    });
+                })
+                .otherwise(function (err) {
+                    console.log("there was an error: ", err);
                 });
-
-            });
-
-            map.add(featureLayer)
-
-        });
+        })
     })
 
 
@@ -112,8 +190,15 @@
         "esri/Map",
         "esri/views/SceneView",
         "esri/layers/FeatureLayer",
+        "esri/renderers/smartMapping/creators/size",
+        "esri/renderers/smartMapping/statistics/histogram",
+        "esri/widgets/SizeSlider",
+        "esri/widgets/Legend",
+        "esri/core/lang",
+        "dojo/on",
         "dojo/domReady!"
-    ], function(Map, SceneView, FeatureLayer){
+    ], function(Map, SceneView, FeatureLayer,sizeRendererCreator, histogram,
+                SizeSlider, Legend, lang, on){
         var template = {
             title: "寻址模型：MaxZi = Di / Pi",
             content: "Z值：{Join_Count}",
@@ -157,7 +242,7 @@
             url: "https://10.60.42.201:6442/arcgis/rest/services/环同济经济圈寻址模型/MapServer/0",
             outFields: ["*"],
             popupTemplate: {
-                //title: "{type}区 {name}",
+                title: "寻址模型：MaxZi = Di / Pi",
                 content: "该地区Z值为 {Z_value}."
             }
         });
